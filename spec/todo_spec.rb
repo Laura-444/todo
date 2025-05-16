@@ -1,9 +1,13 @@
 require_relative '../lib/todo'
 
 RSpec.describe Todo do
-  describe '.hi' do
-    it 'salutes' do
-      expect(Todo.hi('Lau')).to eq('Hi Lau')
+  let(:todo) { Todo }
+
+  describe '.list_tasks' do
+    let(:result) { todo.list_tasks }
+
+    it 'returns a list of tasks' do
+      expect(result).to all(be_a(Hash))
     end
   end
 end
