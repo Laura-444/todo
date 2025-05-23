@@ -1,0 +1,62 @@
+[
+  {
+    "id": "f63a6d6e-3a61-4d57-b043-89606556c050",
+    "title": "Pay wather",
+    "description": "Pay the water bill before 05/31/2025.",
+    "done": false
+  },
+  {
+    "id": "9958eda0-73d0-4afd-81cf-44cbffdba68e",
+    "title": "Pay CreditCard",
+    "description": "Pay the credit card before 05/28/25.",
+    "done": false
+  },
+  {
+    "id": "44d49490-da0b-4339-a9b2-a475eac827e5",
+    "title": "FInish Proyect",
+    "description": "Wrap up all tasks and prepare for presentation",
+    "done": false
+  },
+  {
+    "id": "c105d1cc-5ef5-4258-965e-71772b4ee41f",
+    "title": "Read the book",
+    "description": "Read up to chapter 5 of Clean Code and write a summary of the main ideas.",
+    "done": false
+  },
+  {
+    "id": "61e122c9-7385-45ae-9048-15e3c860bb30",
+    "title": "Makes math homework",
+    "description": "Complete the math homework assignment.",
+    "done": false
+  },
+  {
+    "id": "38f13d3e-d296-4330-abdb-6c11b761cea3",
+    "title": "Cancel suscription Netflix",
+    "description": "Cancel the Netflix subscription before 10/10/27",
+    "done": false
+  },
+  {
+    "id": "54d2f3ad-9ab6-4589-93ab-c5b07b83a6aa",
+    "title": "Cancel suscription Prime",
+    "description": "Cancel the Amazon Prime subscription before 28/09/26",
+    "done": false
+  },
+  {
+    "id": "7eabbe6b-0251-418d-ad26-c1f3bfc9a0f5",
+    "title": "Update the calendar",
+    "description": "Update the calendar with upcoming tasks or events.",
+    "done": false
+  },
+  {
+    "id": "3cf6582b-dd80-4b8c-bf50-065451631c4a",
+    "title": "Create a monthly budget",
+    "description": "Create a monthly budget for personal expenses.",
+    "done": false
+  },
+  {
+    "id": "2700be2d-972e-4c11-8fd1-dfdfca023e99",
+    "title": "Call the doctor",
+    "description": "Call the doctor to schedule or confirm an appointment.",
+    "done": false
+  }
+]
