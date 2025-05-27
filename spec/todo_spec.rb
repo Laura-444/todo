@@ -46,4 +46,60 @@ RSpec.describe Todo do
       end
     end
   end
+
+  describe '.add_task' do
+    let(:title) { 'Prepare project' }
+    let(:description) { 'Test description' }
+    let(:done) { false }
+    let(:result) { todo.add_task title: title, description: description, done: false }
+
+    it 'create a new task' do
+      expect(result).to be_a(Hash)
+      expect(result['title']).to eq(title)
+      expect(result['description']).to eq(description)
+      expect(result['done']).to eq(false)
+      expect(result['id']).not_to be_nil
+    end
+  end
+
+  describe '.edit_task' do
+    let :original_task do
+      todo.add_task(
+        title: 'Learn about flowers',
+        description: 'Wather the plants every morning for a week',
+        done: false
+      )
+    end
+
+    let(:id) { original_task['id'] }
+
+    it 'edits an existing task' do
+      new_title = 'Call the vet'
+      new_description = 'Checkup on the right paw'
+
+      result = Todo.edit_task(
+        id: id,
+        title: new_title,
+        description: new_description,
+        done: true
+      )
+
+      expect(result).to be_a(Hash)
+      expect(result['id']).to eq(id)
+      expect(result['title']).to eq(new_title)
+      expect(result['description']).to eq(new_description)
+      expect(result['done']).to eq(true)
+    end
+
+    context 'when the task ID does not exist' do
+      it 'return nil' do
+        result = Todo.edit_task(
+          id: 'non-existent-id',
+          title: 'Should not work'
+        )
+
+        expect(result).to be_nil
+      end
+    end
+  end
 end
