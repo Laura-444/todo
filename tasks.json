@@ -58,5 +58,35 @@
     "title": "Call the doctor",
     "description": "Call the doctor to schedule or confirm an appointment.",
     "done": false
+  },
+  {
+    "id": "8b8df428-e6da-43d3-97f2-edf785cecd12",
+    "title": "Call the vet",
+    "description": "Checkup on the right paw",
+    "done": true
+  },
+  {
+    "id": "867f1bc7-798b-4253-807a-9301fe81ad64",
+    "title": "Prepare project",
+    "description": "Test description",
+    "done": false
+  },
+  {
+    "id": "37cd6469-b1d2-4d3a-9e53-a9d0379b513c",
+    "title": "Test desde IRB",
+    "description": "Este es un task nuevo para probar en consola",
+    "done": false
+  },
+  {
+    "id": "67a3ab3a-e842-4ce2-be5d-e345e5e4588f",
+    "title": "Call the vet",
+    "description": "Checkup on the right paw",
+    "done": true
+  },
+  {
+    "id": "66b9c56a-0104-41b9-ae52-c870bb21deb2",
+    "title": "Prepare project",
+    "description": "Test description",
+    "done": false
   }
 ]
