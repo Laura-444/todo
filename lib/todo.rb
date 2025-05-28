@@ -1,11 +1,52 @@
 require 'json'
 require 'securerandom'
 
-module Todo
-  extend self
+class Storage
+  def read
+    raise NotImplementedError
+  end
+
+  def write
+    raise NotImplementedError
+  end
+end
+
+class JSONStorage < Storage
+  def initialize(file = 'tasks.json')
+    @file = file
+    File.write @file, '[]' unless File.exist? @file
+  end
+
+  def read
+    JSON.parse File.read(@file)
+  end
+
+  def write(tasks)
+    File.write @file, JSON.pretty_generate(tasks)
+  end
+end
+
+class InMemoryStorage < Storage
+  def initialize
+    @task = []
+  end
+
+  def read 
+    @task
+  end
+
+  def write(tasks)
+    @task = tasks
+  end
+end
+
+class Todo
+  def initialize(storage)
+    @storage = storage
+  end
 
   def list_tasks
-    JSON.parse File.read('tasks.json')
+    @storage.read
   end
 
   def find_task(id)
@@ -16,9 +57,10 @@ module Todo
     tasks = list_tasks
     deleted_task = tasks.find { |task| task['id'] == id }
 
-    return nil unless deleted_task
+    return unless deleted_task
 
     tasks.delete deleted_task
+    @storage.write tasks
     deleted_task
   end
 
@@ -33,20 +75,20 @@ module Todo
     }
 
     tasks << new_task
-    File.write 'tasks.json', JSON.pretty_generate(tasks)
+    @storage.write tasks
     new_task
   end
 
   def edit_task(id, title: nil, description: nil, done: nil)
     tasks = list_tasks
     task = tasks.find { |task| task['id'] == id }
-    return nil unless task
+    return unless task
 
     task['title'] = title if title
     task['description'] = description if description
     task['done'] = done unless done.nil?
 
-    File.write 'tasks.json', JSON.pretty_generate(tasks)
+    @storage.write tasks
     task
   end
 end
