@@ -50,8 +50,14 @@ RSpec.describe Todo do
   describe '.delete_task' do
     let :tasks do
       [
-        { 'id' => '123', 'title' => 'Call the vet', 'descripcion' => 'appointment for vaccines', 'done' => false },
-        { 'id' => '567', 'title' => 'Go to the store', 'descripcion' => 'buy vegetables', 'done' => false },
+        { 'id' => '123',
+          'title' => 'Call the vet',
+          'descripcion' => 'appointment for vaccines',
+          'done' => false,  },
+        { 'id' => '567',
+          'title' => 'Go to the store',
+          'descripcion' => 'buy vegetables',
+          'done' => false, },
       ]
     end
 
@@ -105,22 +111,30 @@ RSpec.describe Todo do
   end
 
   describe '.edit_task' do
-    let :original_task do
-      todo.add_task(
-        title: 'Learn about flowers',
-        description: 'Wather the plants every morning for a week',
-        done: false
-      )
+    let :tasks do
+      [
+        { 'id' => '123',
+          'title' => 'Call the vet',
+          'description' => 'appointment for vaccines',
+          'done' => false, },
+      ]
     end
 
-    let(:id) { original_task['id'] }
+    let :storage do
+      s = InMemoryStorage.new
+      s.write tasks
+      s
+    end
+
+    let(:todo) { Todo.new storage }
+    let(:id) { '123' }
 
     it 'edits an existing task' do
       new_title = 'Call the vet'
       new_description = 'Checkup on the right paw'
 
-      result = Todo.edit_task(
-        id: id,
+      result = todo.edit_task(
+        id,
         title: new_title,
         description: new_description,
         done: true
@@ -134,12 +148,11 @@ RSpec.describe Todo do
     end
 
     context 'when the task ID does not exist' do
-      it 'return nil' do
-        result = Todo.edit_task(
-          id: 'non-existent-id',
-          title: 'Should not work'
+      it 'returns nil' do
+        result = todo.edit_task(
+          'non-existent-id',
+          title: 'invalid ID'
         )
-
         expect(result).to be_nil
       end
     end
