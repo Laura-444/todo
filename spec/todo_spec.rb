@@ -1,13 +1,14 @@
 # require_relative '../lib/todo'
 
 RSpec.describe Todo do
-  let(:todo) { Todo }
+  let(:storage) { InMemoryStorage.new }
+  let(:todo) { Todo.new storage }
 
   describe '.list_tasks' do
     let(:result) { todo.list_tasks }
 
     it 'returns a list of tasks' do
-      expect(result).to all(be_a(Hash))
+      expect(result).to eq([])
     end
   end
 
