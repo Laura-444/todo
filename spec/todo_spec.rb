@@ -82,10 +82,18 @@ RSpec.describe Todo do
   end
 
   describe '.add_task' do
+    let :storage do
+      s = InMemoryStorage.new
+      s.write []
+      s
+    end
+
+    let(:todo) { Todo.new storage }
+
     let(:title) { 'Prepare project' }
     let(:description) { 'Test description' }
     let(:done) { false }
-    let(:result) { todo.add_task title: title, description: description, done: false }
+    let(:result) { todo.add_task title, description, done }
 
     it 'create a new task' do
       expect(result).to be_a(Hash)
