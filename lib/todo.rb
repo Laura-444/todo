@@ -1,15 +1,27 @@
 require 'json'
+require 'csv'
 require 'securerandom'
 
 class Storage
-  def read
-    raise NotImplementedError
-  end
-
-  def write
-    raise NotImplementedError
-  end
+  def read = raise(NotImplementedError)
+  def write = raise(NotImplementedError)
 end
+
+# class CSVStorage < Storage
+# def initialize(file = 'tasks.csv')
+#  @file = file
+# File.write @file, 'id, title, description, done' unless File.exist? @file
+# end
+
+# def read
+# task = []
+# CSV.foreach @file, headers:
+# end
+
+# def write(tasks)
+# CSV.open @file, 'w' do |csv|
+# end
+# end
 
 class JSONStorage < Storage
   def initialize(file = 'tasks.json')
@@ -31,7 +43,7 @@ class InMemoryStorage < Storage
     @task = []
   end
 
-  def read 
+  def read
     @task
   end
 
@@ -71,7 +83,7 @@ class Todo
       'id' => SecureRandom.uuid,
       'title' => title,
       'description' => description,
-      'done' => done,
+      'done' => false,
     }
 
     tasks << new_task
