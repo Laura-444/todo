@@ -13,16 +13,33 @@ RSpec.describe Todo do
   end
 
   describe '.find_task' do
-    let(:id) { 'f63a6d6e-3a61-4d57-b043-89606556c050' }
+    let :tasks do
+      [
+        { 'id' => '123', 'title' => 'Call the vet', 'descripcion' => 'appointment for vaccines', 'done' => false },
+        { 'id' => '567', 'title' => 'Go to the store', 'descripcion' => 'buy vegetables', 'done' => false },
+      ]
+    end
+
+    let :storage do
+      s = InMemoryStorage.new
+      s.write tasks
+      s
+    end
+
+    let(:todo) { Todo.new storage }
     let(:result) { todo.find_task id }
 
-    it 'finds the desired task' do
-      expect(result).to be_a(Hash)
-      expect(result['id']).to eq(id)
+    context 'When ID exist' do
+      let(:id) { '123' }
+
+      it 'finds the desired task' do
+        expect(result).to be_a(Hash)
+        expect(result['id']).to eq(id)
+      end
     end
 
     context 'With unknown ID' do
-      let(:id) { 'bd3a6d6e-3a61-4d57-b043-89606556c050' }
+      let(:id) { 'bc050' }
 
       it 'returns nil' do
         expect(result).to be_nil
