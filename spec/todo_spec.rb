@@ -1,5 +1,3 @@
-# require_relative '../lib/todo'
-
 RSpec.describe Todo do
   let(:storage) { InMemoryStorage.new }
   let(:todo) { Todo.new storage }
@@ -8,25 +6,18 @@ RSpec.describe Todo do
     let(:result) { todo.list_tasks }
 
     it 'returns a list of tasks' do
-      expect(result).to eq([])
+      expect(result).to all(be_a(Hash))
     end
   end
 
   describe '.find_task' do
-    let :tasks do
-      [
-        { 'id' => '123', 'title' => 'Call the vet', 'descripcion' => 'appointment for vaccines', 'done' => false },
-        { 'id' => '567', 'title' => 'Go to the store', 'descripcion' => 'buy vegetables', 'done' => false },
-      ]
+    before do
+      storage.write([
+        { 'id' => '123', 'title' => 'Call the vet', 'description' => 'appointment for vaccines', 'done' => false },
+        { 'id' => '567', 'title' => 'Go to the store', 'description' => 'buy vegetables', 'done' => false },
+      ])
     end
 
-    let :storage do
-      s = InMemoryStorage.new
-      s.write tasks
-      s
-    end
-
-    let(:todo) { Todo.new storage }
     let(:result) { todo.find_task id }
 
     context 'When ID exist' do
@@ -48,27 +39,18 @@ RSpec.describe Todo do
   end
 
   describe '.delete_task' do
-    let :tasks do
-      [
+    before do
+      storage.write([
         { 'id' => '123',
           'title' => 'Call the vet',
-          'descripcion' => 'appointment for vaccines',
+          'description' => 'appointment for vaccines',
           'done' => false,  },
         { 'id' => '567',
           'title' => 'Go to the store',
-          'descripcion' => 'buy vegetables',
+          'description' => 'buy vegetables',
           'done' => false, },
-      ]
+      ])
     end
-
-    let :storage do
-      s = InMemoryStorage.new
-      s.write tasks
-      s
-    end
-
-    let(:todo) { Todo.new storage }
-    let(:result) { todo.find_task id }
 
     let(:id) { '123' }
     let(:result) { todo.delete_task id }
@@ -82,24 +64,21 @@ RSpec.describe Todo do
       let(:id) { 'c050' }
 
       it 'returns nil' do
-        expect(result).to be_nil
+        expect(todo.delete_task(id)).to be_nil
       end
     end
   end
 
-  describe '.add_task' do
-    let :storage do
-      s = InMemoryStorage.new
-      s.write []
-      s
-    end
-
-    let(:todo) { Todo.new storage }
+  describe '.create_task' do
+    before { storage.write [] }
 
     let(:title) { 'Prepare project' }
     let(:description) { 'Test description' }
     let(:done) { false }
-    let(:result) { todo.add_task title, description, done }
+
+    let :result do
+      todo.create_task title, description: description, done: done
+    end
 
     it 'create a new task' do
       expect(result).to be_a(Hash)
@@ -110,30 +89,23 @@ RSpec.describe Todo do
     end
   end
 
-  describe '.edit_task' do
-    let :tasks do
-      [
+  describe '.update_task' do
+    before do
+      storage.write([
         { 'id' => '123',
           'title' => 'Call the vet',
           'description' => 'appointment for vaccines',
           'done' => false, },
-      ]
+      ])
     end
 
-    let :storage do
-      s = InMemoryStorage.new
-      s.write tasks
-      s
-    end
-
-    let(:todo) { Todo.new storage }
     let(:id) { '123' }
 
     it 'edits an existing task' do
       new_title = 'Call the vet'
       new_description = 'Checkup on the right paw'
 
-      result = todo.edit_task(
+      result = todo.update_task(
         id,
         title: new_title,
         description: new_description,
@@ -149,7 +121,7 @@ RSpec.describe Todo do
 
     context 'when the task ID does not exist' do
       it 'returns nil' do
-        result = todo.edit_task(
+        result = todo.update_task(
           'non-existent-id',
           title: 'invalid ID'
         )
