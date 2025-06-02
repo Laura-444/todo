@@ -7,21 +7,24 @@ class Storage
   def write = raise(NotImplementedError)
 end
 
-# class CSVStorage < Storage
-# def initialize(file = 'tasks.csv')
-#  @file = file
-# File.write @file, 'id, title, description, done' unless File.exist? @file
-# end
+class CSVStorage < Storage
+  def initialize(file = 'tasks.csv')
+    @file = file
+    File.write @file, "id,title,description,done\n" unless File.exist? @file
+  end
 
-# def read
-# task = []
-# CSV.foreach @file, headers:
-# end
+  def read
+    CSV.read(@file, headers: true).map(&:to_h)
+  end
 
-# def write(tasks)
-# CSV.open @file, 'w' do |csv|
-# end
-# end
+  def write(tasks)
+    CSV.open @file, 'w', write_headers: true, headers: %w[id title description done] do |csv|
+      tasks.each do |task|
+        csv << [task['id'], task['title'], task['description'], task['done']]
+      end
+    end
+  end
+end
 
 class JSONStorage < Storage
   def initialize(file = 'tasks.json')
@@ -40,15 +43,15 @@ end
 
 class InMemoryStorage < Storage
   def initialize
-    @task = []
+    @tasks = []
   end
 
   def read
-    @task
+    @tasks
   end
 
   def write(tasks)
-    @task = tasks
+    @tasks = tasks
   end
 end
 
@@ -76,29 +79,24 @@ class Todo
     deleted_task
   end
 
-  def add_task(title, description, done)
+  def create_task(title, **attributes)
     tasks = list_tasks
 
-    new_task = {
-      'id' => SecureRandom.uuid,
-      'title' => title,
-      'description' => description,
-      'done' => false,
-    }
+    new_task = attributes.merge id: SecureRandom.uuid, title: title, done: false
 
     tasks << new_task
     @storage.write tasks
     new_task
   end
 
-  def edit_task(id, title: nil, description: nil, done: nil)
+  def update_task(id, **attributes)
     tasks = list_tasks
     task = tasks.find { |task| task['id'] == id }
     return unless task
 
-    task['title'] = title if title
-    task['description'] = description if description
-    task['done'] = done unless done.nil?
+    attributes.each do |key, value|
+      task[key.to_s] = value
+    end
 
     @storage.write tasks
     task
