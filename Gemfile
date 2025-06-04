@@ -7,3 +7,5 @@ gem 'rspec', '~> 3.13.0'
 gem 'simplecov', '~> 0.22.0'
 
 gem 'json', '~> 2.12'
+
+gem "thor", "~> 1.3"
