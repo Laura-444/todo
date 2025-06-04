@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+
+require 'thor'
+require_relative '../lib/todo'
+
+class TodoCLI < Thor
+  desc 'list', 'List all tasks'
+  def list
+    puts todo.list_tasks.to_json
+  end
+
+  desc 'find', 'Find task by ID'
+  def find(id)
+    task = todo.find_task id
+
+    return if task.nil?
+
+    puts task.to_json
+  end
+
+  desc 'delete', 'Delete task by ID'
+  def delete(id)
+    deleted_task = todo.delete_task id
+
+    return if deleted_task.nil?
+
+    puts deleted_task.to_json
+  end
+
+  desc 'create TITLE', 'Create task with TITLE'
+  option :description, desc: 'Description of the task'
+  def create(title)
+    new_task = todo.create_task title, description: options[:description]
+
+    return if new_task.nil?
+
+    puts new_task.to_json
+  end
+
+  desc 'edit ID', 'Edit task by ID'
+  option :title, desc: 'New title'
+  option :description, desc: 'New description'
+  option :done, type: :boolean, desc: 'Task as done'
+  option :undone, type: :boolean, desc: 'Task undone'
+
+  def edit(id)
+    attributes = {}
+    attributes[:title] = options[:title] if options[:title]
+    attributes[:description] = options[:description] if options[:description]
+
+    if options[:done] && options[:undone]
+      return
+    elsif options[:done]
+      attributes[:done] = true
+    elsif options[:undone]
+      attributes[:done] = false
+    end
+    return if attributes.empty?
+
+    updated_task = todo.update_task(id, **attributes)
+    return if updated_task.nil?
+
+    puts updated_task.to_json
+  end
+
+  no_commands do
+    def todo
+      @todo ||= Todo.new storage
+    end
+
+    def storage
+      @storage ||= MemoryStorage.new([
+        { id: '123',
+          title: 'Call the vet',
+          description: 'appointment for vaccines',
+          done: false, },
+        {
+          id: '567',
+          title: 'Go to the store',
+          description: 'buy vegetables',
+          done: false,
+        },
+      ])
+    end
+  end
+end
+TodoCLI.start ARGV
