@@ -86,7 +86,7 @@ RSpec.describe Todo do
     end
   end
 
-  describe '.update_task' do
+  describe '.edit_task' do
     let(:id) { '123' }
 
     it 'edits an existing task' do
@@ -94,7 +94,7 @@ RSpec.describe Todo do
       new_description = 'IT'
       new_done = true
 
-      result = todo.update_task(
+      result = todo.edit_task(
         id,
         title: new_title,
         description: new_description,
@@ -110,7 +110,7 @@ RSpec.describe Todo do
 
     context 'when the task ID does not exist' do
       it 'returns nil' do
-        result = todo.update_task(
+        result = todo.edit_task(
           'non-existent-id',
           title: 'invalid ID'
         )
