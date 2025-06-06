@@ -19,28 +19,44 @@ end
 class CSVStorage < Storage
   def initialize(file = 'tasks.csv')
     @file = file
-    File.write @file, "id,title,description,done\n" unless File.exist? @file
   end
 
   def read
     tasks = []
-    CSV.foreach @file, headers: true, header_converters: :symbol do |row|
-      task = row.to_h
-      task[:done] = task[:done] == 'true' if task.key? :done
-      tasks << task
+    begin
+      CSV.foreach @file, headers: true, header_converters: :symbol do |row|
+        task = row.to_h
+        task[:done] = task[:done] == 'true' if task.key? :done
+        tasks << task
+      end
+      tasks
+    rescue Errno::ENOENT => e
+      raise TodoFileReadError, "File '#{@file}' not found: #{e.message}"
+    rescue Errno::EACCES => e
+      raise TodoFileReadError, "Permission denied to read file '#{@file}': #{e.message}"
+    rescue CSV::MalformedCSVError => e
+      raise TodoFileReadError, "Failed to parse file '#{@file}': invalid CSV format #{e.message}"
+    rescue StandardError => e
+      raise TodoFileReadError, "Unexpected error #{e.message}"
     end
-
-    tasks
   end
 
   def write(tasks)
     headers = tasks.first&.keys
     return if headers.nil?
 
-    CSV.open @file, 'w', write_headers: true, headers: headers do |csv|
-      tasks.each do |task|
-        csv << headers.map { |header| task[header] }
+    begin
+      CSV.open @file, 'w', write_headers: true, headers: headers do |csv|
+        tasks.each do |task|
+          csv << headers.map { |header| task[header] }
+        end
       end
+    rescue Errno::ENOENT => e
+      raise TodoFileWriteError, "File '#{@file}' not found: #{e.message}"
+    rescue Errno::EACCES => e
+      raise TodoFileWriteError, "Permission denied to write file '#{@file}': #{e.message}"
+    rescue StandardError => e
+      raise TodoFileWriteError, "Unexpected error #{e.message}"
     end
   end
 end
@@ -60,7 +76,7 @@ class JSONStorage < Storage
   rescue JSON::ParserError => e
     raise TodoFileReadError, "Failed to parse file '#{@file}' invalid Json format: #{e.message}"
   rescue StandardError => e
-    raise TodoFileReadError, "Error unexpected: #{e.message}"
+    raise TodoFileReadError, "Unexpected error #{e.message}"
   end
 
   def write(tasks)
@@ -70,7 +86,7 @@ class JSONStorage < Storage
   rescue Errno::ENOENT => e
     raise TodoFileWriteError, "File '#{@file}' not found: #{e.message}"
   rescue StandardError => e
-    raise TodoFileWriteError, "Error unexpected #{e.message}"
+    raise TodoFileWriteError, "Unexpected error #{e.message}"
   end
 end
 
