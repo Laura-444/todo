@@ -29,8 +29,22 @@ class TodoCLI < Thor
 
   desc 'create TITLE', 'Create task with TITLE'
   option :description, desc: 'Description of the task'
+  option :done, type: :boolean, desc: 'Task as done'
+  option :undone, type: :boolean, desc: 'Task as undone'
+
   def create(title)
-    new_task = todo.create_task title, description: options[:description]
+    attributes = {}
+    attributes[description:] = options[:description] if options[:description]
+
+    if options[:done] && options[:undone]
+      return
+    elsif options[:done]
+      attributes[:done] = true
+    elsif options[:undone]
+      attributes[:done] = false
+    end
+
+    new_task = todo.create_task(title, **attributes)
 
     return if new_task.nil?
 
@@ -78,7 +92,7 @@ class TodoCLI < Thor
           id: '567',
           title: 'Go to the store',
           description: 'buy vegetables',
-          done: false,
+          done: true,
         },
       ])
     end
