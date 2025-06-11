@@ -7,6 +7,11 @@ class TodoCLI < Thor
   desc 'list', 'List all tasks'
   def list
     puts todo.list_tasks.to_json
+
+    task = todo.list_tasks.first
+    puts "Title: #{task[:title]}, description: #{task[:description]}, #{task[:done]}"
+  rescue TodoError => e
+    puts "ERROR: #{e.message}"
   end
 
   desc 'find', 'Find task by ID'
@@ -16,6 +21,8 @@ class TodoCLI < Thor
     return if task.nil?
 
     puts task.to_json
+  rescue TodoError => e
+    puts "ERROR: #{e.message}"
   end
 
   desc 'delete', 'Delete task by ID'
@@ -25,6 +32,8 @@ class TodoCLI < Thor
     return if deleted_task.nil?
 
     puts deleted_task.to_json
+  rescue TodoError => e
+    puts "ERROR: #{e.message}"
   end
 
   desc 'create TITLE', 'Create task with TITLE'
@@ -34,7 +43,7 @@ class TodoCLI < Thor
 
   def create(title)
     attributes = {}
-    attributes[description:] = options[:description] if options[:description]
+    attributes[:description] = options[:description] if options[:description]
 
     if options[:done] && options[:undone]
       return
@@ -49,6 +58,8 @@ class TodoCLI < Thor
     return if new_task.nil?
 
     puts new_task.to_json
+  rescue TodoError => e
+    puts "ERROR: #{e.message}"
   end
 
   desc 'edit ID', 'Edit task by ID'
@@ -71,10 +82,12 @@ class TodoCLI < Thor
     end
     return if attributes.empty?
 
-    updated_task = todo.update_task(id, **attributes)
-    return if updated_task.nil?
+    edit_task = todo.edit_task(id, **attributes)
+    return if edit_task.nil?
 
-    puts updated_task.to_json
+    puts edit_task.to_json
+  rescue TodoError => e
+    puts "ERROR: #{e.message}"
   end
 
   no_commands do
@@ -95,6 +108,8 @@ class TodoCLI < Thor
           done: true,
         },
       ])
+    rescue TodoFileReadError => e
+      puts "ERROR: #{e.message}"
     end
   end
 end
