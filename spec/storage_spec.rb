@@ -52,3 +52,25 @@ RSpec.describe JSONStorage do
     end
   end
 end
+
+RSpec.describe CSVStorage do
+  let(:file) { 'example_test.csv' }
+
+  let :test_tasks do
+    [
+      { id: '2', title: 'drink water', done: false },
+      { id: '5', title: 'read the book', done: true },
+    ]
+  end
+
+  let(:storage) { CSVStorage.new file }
+
+  describe 'write and read' do
+    it 'writes and reads the tasks' do
+      storage.write test_tasks
+      result = storage.read
+
+      expect(result).to eq(test_tasks)
+    end
+  end
+end
