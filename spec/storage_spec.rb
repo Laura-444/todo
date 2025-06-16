@@ -70,23 +70,45 @@ RSpec.describe JSONStorage do
 end
 
 RSpec.describe CSVStorage do
-  let(:file) { 'example_test.csv' }
+  let(:file_name) { 'example_test.csv' }
+  let(:storage) { CSVStorage.new file_name }
 
-  let :test_tasks do
-    [
-      { id: '2', title: 'drink water', done: false },
-      { id: '5', title: 'read the book', done: true },
-    ]
+  describe '.read' do
+    let(:result) { storage.read }
+
+    context 'with valid file' do
+      before do
+        CSV.open file_name, 'w', write_headers: true, headers: %w[id title done] do |csv|
+          csv << ['1', 'read book', 'false']
+        end
+      end
+
+      it 'reads a desired file' do
+        expect(result).to all(be_a(Hash))
+        expect(result.first[:title]).to eq('read book')
+      end
+    end
+
+    context 'with invalid file' do
+      before { File.write file_name, "id,title\n4\"" }
+
+      it 'return an excepcion' do
+        expect { storage.read }.to raise_error(TodoFileReadError)
+      end
+    end
   end
 
-  let(:storage) { CSVStorage.new file }
+  describe '.write' do
+    let(:tasks) { [{ id: '1', title: 'nothing', done: false }] }
 
-  describe 'write and read' do
-    it 'writes and reads the tasks' do
-      storage.write test_tasks
-      result = storage.read
+    before do
+      storage.write tasks
+    end
 
-      expect(result).to eq(test_tasks)
+    it 'writes a desired file' do
+      content = CSV.read(file_name, headers: true, header_converters: :symbol).map(&:to_h)
+      content.each { |task| task[:done] = task[:done] == 'true' }
+      expect(content).to eq(tasks)
     end
   end
 end
