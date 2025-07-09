@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+export DB_CONNECTION_URI=postgres://username:password@localhost:5433/todo
