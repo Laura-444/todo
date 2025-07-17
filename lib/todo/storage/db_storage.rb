@@ -33,20 +33,11 @@ class Todo
               AND user_id = :user_id
       SQL
 
-      # USER_TASKS_QUERY = <<~SQL.freeze
-      # SELECT tasks.*
-      # FROM tasks
-      # JOIN users ON users.id = tasks.user_id
-      # AND users.deleted_at IS NULL
-      # WHERE tasks.deleted_at IS NULL
-      #  AND users.username = :username;
-      # SQL
-
       def read
-        db.fetch(ALL_TASKS_QUERY, { user_id: user_id })
+        db.fetch(ALL_TASKS_QUERY, { user_id: user_id }).all
       end
 
-      DELETE_USERS_TASKS = <<~SQL.freeze
+      DELETE_TASKS_BY_USER_ID = <<~SQL.freeze
         DELETE FROM tasks
         WHERE user_id = :user_id;
       SQL
@@ -57,15 +48,15 @@ class Todo
       SQL
 
       def write(tasks)
-        db.fetch(DELETE_USERS_TASKS, { user_id: user_id })
+        db.fetch(DELETE_TASKS_BY_USER_ID, { user_id: user_id }).all
 
-        tasks.each do |task|
+        tasks.map do |task|
           db.fetch(CREATE_USERS_TASKS, {
             user_id: user_id,
             title: task[:title],
             description: task[:description],
             done: task[:done],
-          })
+          }).all
         end
       end
     end
