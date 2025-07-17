@@ -7,10 +7,8 @@ class TodoCLI < Thor
   desc 'list', 'List all tasks'
   def list
     puts todo.list_tasks.to_json
-
-    task = todo.list_tasks.first
-    puts "Title: #{task[:title]}, description: #{task[:description]}, #{task[:done]}"
-  rescue TodoError => e
+  # puts task.to_json
+  rescue Todo::TodoError => e
     puts "ERROR: #{e.message}"
   end
 
@@ -21,7 +19,7 @@ class TodoCLI < Thor
     return if task.nil?
 
     puts task.to_json
-  rescue TodoError => e
+  rescue Todo::TodoError => e
     puts "ERROR: #{e.message}"
   end
 
@@ -32,7 +30,7 @@ class TodoCLI < Thor
     return if deleted_task.nil?
 
     puts deleted_task.to_json
-  rescue TodoError => e
+  rescue Todo::TodoError => e
     puts "ERROR: #{e.message}"
   end
 
@@ -58,7 +56,7 @@ class TodoCLI < Thor
     return if new_task.nil?
 
     puts new_task.to_json
-  rescue TodoError => e
+  rescue Todo::TodoError => e
     puts "ERROR: #{e.message}"
   end
 
@@ -86,30 +84,28 @@ class TodoCLI < Thor
     return if edit_task.nil?
 
     puts edit_task.to_json
-  rescue TodoError => e
+  rescue Todo::TodoError => e
     puts "ERROR: #{e.message}"
   end
 
   no_commands do
     def todo
-      @todo ||= Todo.new storage
+      @todo ||= Todo.new username
+    rescue Todo::InvalidUsernameError => e
+      response = ask "Username not found (#{username}), should i create it?[Y,n]"
+      raise e unless ['y', 'Y', ''].include? response
+
+      @todo = Todo.new username, force: true
     end
 
-    def storage
-      @storage ||= MemoryStorage.new([
-        { id: '123',
-          title: 'Call the vet',
-          description: 'appointment for vaccines',
-          done: false, },
-        {
-          id: '567',
-          title: 'Go to the store',
-          description: 'buy vegetables',
-          done: true,
-        },
-      ])
-    rescue TodoFileReadError => e
-      puts "ERROR: #{e.message}"
+    def username
+      return @username unless @username.nil?
+
+      username = ENV.fetch 'TODO_USERNAME', nil
+
+      raise Todo::TodoError.new('Please set TODO_USERNAME env variable') if username.nil? || username.empty?
+
+      @username = username
     end
   end
 end
