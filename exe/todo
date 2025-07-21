@@ -38,6 +38,7 @@ class TodoCLI < Thor
   option :description, desc: 'Description of the task'
   option :done, type: :boolean, desc: 'Task as done'
   option :undone, type: :boolean, desc: 'Task as undone'
+  option :deadline, desc: 'Deadline'
 
   def create(title)
     attributes = {}
@@ -50,6 +51,8 @@ class TodoCLI < Thor
     elsif options[:undone]
       attributes[:done] = false
     end
+
+    attributes[:deadline] = options[:deadline] if options[:deadline]
 
     new_task = todo.create_task(title, **attributes)
 
@@ -65,6 +68,7 @@ class TodoCLI < Thor
   option :description, desc: 'New description'
   option :done, type: :boolean, desc: 'Task as done'
   option :undone, type: :boolean, desc: 'Task undone'
+  option :deadline, desc: 'New deadline'
 
   def edit(id)
     attributes = {}
@@ -78,6 +82,9 @@ class TodoCLI < Thor
     elsif options[:undone]
       attributes[:done] = false
     end
+
+    attributes[:deadline] = options[:deadline] if options[:deadline]
+
     return if attributes.empty?
 
     edit_task = todo.edit_task(id, **attributes)
