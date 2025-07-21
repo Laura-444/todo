@@ -1,4 +1,6 @@
-RSpec.describe MemoryStorage do
+require 'spec_helper'
+
+RSpec.describe Todo::Storage::MemoryStorage do
   let :test_tasks do
     [
       { id: '2', title: 'buy vegetables', done: false },
@@ -6,41 +8,40 @@ RSpec.describe MemoryStorage do
     ]
   end
 
-  let(:storage) { MemoryStorage.new test_tasks }
+  let(:storage) { Todo::Storage::MemoryStorage.new test_tasks }
 
-  describe 'read' do
+  describe '#read' do
     it 'reads the tasks' do
       result = storage.read
       expect(result).to eq(test_tasks)
     end
   end
 
-  describe 'write' do
+  describe '#write' do
     let :new_tasks do
       [
         { id: '7', title: 'read the book', done: false },
       ]
     end
 
-    it 'reeplaces existing task' do
+    it 'replaces existing tasks' do
       storage.write new_tasks
       result = storage.read
-
       expect(result).to eq(new_tasks)
     end
   end
 end
 
-RSpec.describe JSONStorage do
-  let(:file_name) { 'example_test.json' }
-  let(:storage) { JSONStorage.new file_name }
+RSpec.describe Todo::Storage::JSONStorage do
+  let(:file_name) { 'tmp/example_test.json' }
+  let(:storage) { Todo::Storage::JSONStorage.new file_name }
 
-  describe '.read' do
+  describe '#read' do
     let(:result) { storage.read }
 
     context 'with a valid file' do
       before do
-        JSON.dump([{ id: '1', title: 'something', done: false }], File.open(file_name, 'w'))
+        File.write(file_name, JSON.dump([{ id: '1', title: 'something', done: false }]))
       end
 
       it 'reads a desired file' do
@@ -52,28 +53,30 @@ RSpec.describe JSONStorage do
     context 'with invalid JSON file' do
       before { File.write file_name, 'invalid json {' }
 
-      it 'Return an excepcion' do
-        expect { storage.read }.to raise_error(TodoFileReadError)
+      it 'raises an exception' do
+        expect { storage.read }.to raise_error(Todo::TodoFileReadError)
       end
     end
   end
 
-  describe '.write' do
-    let(:result) { storage.write [{ id: '1', title: 'nothing' }] }
+  describe '#write' do
+    let(:tasks) { [{ id: '1', title: 'nothing', done: false }] }
 
     it 'writes a desired file' do
+      result = storage.write tasks
       expect(result).to be_a(File)
-      content = JSON.parse File.read(file_name)
-      expect(content.first['title']).to eq('nothing')
+
+      content = JSON.parse File.read(file_name), symbolize_names: true
+      expect(content.first[:title]).to eq('nothing')
     end
   end
 end
 
-RSpec.describe CSVStorage do
-  let(:file_name) { 'example_test.csv' }
-  let(:storage) { CSVStorage.new file_name }
+RSpec.describe Todo::Storage::CSVStorage do
+  let(:file_name) { 'tmp/example_test.csv' }
+  let(:storage) { Todo::Storage::CSVStorage.new file_name }
 
-  describe '.read' do
+  describe '#read' do
     let(:result) { storage.read }
 
     context 'with valid file' do
@@ -92,13 +95,13 @@ RSpec.describe CSVStorage do
     context 'with invalid file' do
       before { File.write file_name, "id,title\n4\"" }
 
-      it 'return an excepcion' do
-        expect { storage.read }.to raise_error(TodoFileReadError)
+      it 'raises an exception' do
+        expect { storage.read }.to raise_error(Todo::TodoFileReadError)
       end
     end
   end
 
-  describe '.write' do
+  describe '#write' do
     let(:tasks) { [{ id: '1', title: 'nothing', done: false }] }
 
     before do
