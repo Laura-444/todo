@@ -7,7 +7,6 @@ class TodoCLI < Thor
   desc 'list', 'List all tasks'
   def list
     puts todo.list_tasks.to_json
-  # puts task.to_json
   rescue Todo::TodoError => e
     puts "ERROR: #{e.message}"
   end
@@ -15,7 +14,6 @@ class TodoCLI < Thor
   desc 'find', 'Find task by ID'
   def find(id)
     task = todo.find_task id
-
     return if task.nil?
 
     puts task.to_json
@@ -26,7 +24,6 @@ class TodoCLI < Thor
   desc 'delete', 'Delete task by ID'
   def delete(id)
     deleted_task = todo.delete_task id
-
     return if deleted_task.nil?
 
     puts deleted_task.to_json
@@ -39,6 +36,7 @@ class TodoCLI < Thor
   option :done, type: :boolean, desc: 'Task as done'
   option :undone, type: :boolean, desc: 'Task as undone'
   option :deadline, desc: 'Deadline'
+  option :project, desc: 'Project ID to assign this task'
 
   def create(title)
     attributes = {}
@@ -53,9 +51,9 @@ class TodoCLI < Thor
     end
 
     attributes[:deadline] = options[:deadline] if options[:deadline]
+    attributes[:project_id] = find_project(options[:project]) if options[:project]
 
     new_task = todo.create_task(title, **attributes)
-
     return if new_task.nil?
 
     puts new_task.to_json
@@ -69,6 +67,7 @@ class TodoCLI < Thor
   option :done, type: :boolean, desc: 'Task as done'
   option :undone, type: :boolean, desc: 'Task undone'
   option :deadline, desc: 'New deadline'
+  option :project, desc: 'New project name'
 
   def edit(id)
     attributes = {}
@@ -84,6 +83,7 @@ class TodoCLI < Thor
     end
 
     attributes[:deadline] = options[:deadline] if options[:deadline]
+    attributes[:project_id] = find_project(options[:project]) if options[:project]
 
     return if attributes.empty?
 
@@ -91,6 +91,16 @@ class TodoCLI < Thor
     return if edit_task.nil?
 
     puts edit_task.to_json
+  rescue Todo::TodoError => e
+    puts "ERROR: #{e.message}"
+  end
+
+  desc 'create_project NAME', 'Create a new project'
+  def create_project(name)
+    project = todo.create_project name
+    return if project.nil?
+
+    puts project.to_json
   rescue Todo::TodoError => e
     puts "ERROR: #{e.message}"
   end
@@ -109,11 +119,27 @@ class TodoCLI < Thor
       return @username unless @username.nil?
 
       username = ENV.fetch 'TODO_USERNAME', nil
-
       raise Todo::TodoError.new('Please set TODO_USERNAME env variable') if username.nil? || username.empty?
 
       @username = username
     end
+
+    def find_project(name)
+      return nil if name.nil? || name.strip.empty?
+
+      project = todo.find_project_by_name name
+      return project.id if project
+
+      response = ask "Project '#{name}' not found, Do you want to create it? [Y, n]"
+      return nil unless ['y', 'Y', ''].include? response
+
+      project = todo.create_project name
+      project.id
+    rescue Todo::TodoError => e
+      puts "ERROR: #{e.message}"
+      nil
+    end
   end
 end
+
 TodoCLI.start ARGV
