@@ -21,48 +21,61 @@ class Todo
     @user = repository.create_user username
   end
 
-  def list_tasks
-    repository.list_tasks_by_user_id user.id
+  def list_tasks(filters = {})
+    repository.list_tasks_by_user_id @user.id, filters
   end
 
-  def find_task(_id)
-    repository.find_task_by_id
+  def find_task(id)
+    repository.find_task_by_id @user.id, id
   end
 
   def delete_task(id)
-    task = repository.find_task_by_id id
+    task = find_task id
     return if task.nil?
 
-    repository.delete_task_by_id id
+    repository.delete_task_by_id @user.id, id
   end
 
   def create_task(title, **attributes)
-    raise 'Title is required to create a task' if !title.is_a?(String) || title.empty?
+    raise 'Title is required to create a task' unless title.is_a?(String) && !title.empty?
 
-    task = {
-      user_id: user.id,
+    new_task = {
+      user_id: @user.id,
       title: title,
       description: attributes.fetch(:description, ''),
       done: attributes.fetch(:done, false),
       deadline: attributes[:deadline],
+      project_id: attributes[:project_id],
     }
 
-    repository.create_task task
+    repository.create_task new_task
   end
 
   def edit_task(id, **attributes)
-    task = repository.find_task_by_id id
-    # index_task_to_edit = tasks.find_index { |task| task.id == id }
+    task = find_task id
     return if task.nil?
 
-    # tasks[index_task_to_edit].merge! attributes.merge id: id
-    repository.edit_user_task_by_id({
+    params = {
       id: id,
       title: attributes.fetch(:title, task.title),
       description: attributes.fetch(:description, task.description),
       done: attributes.fetch(:done, task.done),
       deadline: attributes.key?(:deadline) ? attributes[:deadline] : task.deadline,
-    })
+      # project_id: attributes.key?(:project_id) ? attributes[:project_id] : task.project_id,
+      user_id: @user.id,
+    }
+
+    repository.edit_user_task_by_id @user.id, params
+  end
+
+  def create_project(name)
+    raise 'Project name is required' if name.nil? || name.empty?
+
+    repository.create_project user_id: user.id, name: name
+  end
+
+  def find_project_by_name(name)
+    repository.find_project_by_name user.id, name
   end
 
   private
