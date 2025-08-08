@@ -9,8 +9,6 @@ class Authenticator
 
   def call(env)
     username = env['HTTP_USERNAME']
-    # require 'pry'
-    # binding.pry
     raise 'Username is required' if username.nil?
 
     app.todo = Todo.new username
